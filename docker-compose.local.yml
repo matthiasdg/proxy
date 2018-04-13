@@ -1,0 +1,26 @@
+version: '2'
+
+networks:
+  traefik:
+    driver: bridge
+
+services:
+  proxy:
+    image: traefik:v1.5.4-alpine
+    networks:
+      - traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "4080:4080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./mount/acme:/etc/traefik/acme
+      - ./mount/config/traefik.local.example.toml:/etc/traefik/config/traefik.toml
+    # we need this for alpine, otherwise it throws
+    command: "--configfile=/etc/traefik/config/traefik.toml"
+    labels:
+      # we need to disable this since otherwise traefik tries to request a certificate
+      # for the container it's running in
+      traefik.enable: "false"
+

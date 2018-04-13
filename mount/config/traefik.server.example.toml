@@ -1,0 +1,195 @@
+# traefik.toml
+################################################################
+# Global configuration
+################################################################
+
+# Timeout in seconds.
+# Duration to give active requests a chance to finish during hot-reloads
+#
+# Optional
+# Default: 10
+#
+# graceTimeOut = 10
+
+# Enable debug mode
+#
+# Optional
+# Default: false
+#
+
+debug = false
+
+# Periodically check if a new version has been released
+#
+# Optional
+# Default: true
+#
+
+checkNewVersion = false
+
+# Traefik logs file
+# If not defined, logs to stdout
+#
+# Optional
+#
+# let's write to stdout so we can rediect to AWS
+# traefikLogsFile = "/var/log/traefik/traefik.log"
+
+# Access logs file
+#
+# Optional
+#
+
+# accessLogsFile = "/var/log/traefik/access.log"
+
+# Log level
+#
+# Optional
+# Default: "ERROR"
+# Accepted values, in order of severity: "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "PANIC"
+# Messages at and above the selected level will be logged.
+#
+
+logLevel = "WARN"
+
+# Backends throttle duration: minimum duration in seconds between 2 events from providers
+# before applying a new configuration. It avoids unnecessary reloads if multiples events
+# are sent in a short amount of time.
+#
+# Optional
+# Default: "2"
+#
+# ProvidersThrottleDuration = "5"
+
+# If non-zero, controls the maximum idle (keep-alive) to keep per-host.  If zero, DefaultMaxIdleConnsPerHost is used.
+# If you encounter 'too many open files' errors, you can either change this value, or change `ulimit` value.
+#
+# Optional
+# Default: http.DefaultMaxIdleConnsPerHost
+#
+# MaxIdleConnsPerHost = 200
+
+# If set to true invalid SSL certificates are accepted for backends.
+# Note: This disables detection of man-in-the-middle attacks so should only be used on secure backend networks.
+# Optional
+# Default: false
+#
+# InsecureSkipVerify = true
+
+# Entrypoints to be used by frontends that do not specify any entrypoint.
+# Each frontend can specify its own entrypoints.
+#
+# Optional
+# Default: ["http"]
+#
+
+defaultEntryPoints = ["http", "https"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+
+[acme]
+    email = "support@mealhero.me"
+    storage = "/etc/traefik/acme/acme.json"
+    entryPoint = "https"
+
+    # Enable on demand certificate. This will request a certificate from Let's Encrypt during the first TLS handshake for a hostname that does not yet have a certificate.
+    # WARNING, TLS handshakes will be slow when requesting a hostname certificate for the first time, this can leads to DoS attacks.
+    # WARNING, Take note that Let's Encrypt have rate limiting: https://letsencrypt.org/docs/rate-limits
+    #
+    # Optional
+    #
+    # onDemand = true
+
+    # Enable certificate generation on frontends Host rules. This will request a certificate from Let's Encrypt for each frontend with a Host rule.
+    # For example, a rule Host:test1.traefik.io,test2.traefik.io will request a certificate with main domain test1.traefik.io and SAN test2.traefik.io.
+    #
+    # Optional
+    #
+
+    OnHostRule = true
+
+    # Staging server, comment out in production
+    # caServer = "https://acme-staging.api.letsencrypt.org/directory"
+
+# Enable retry sending request if network error
+#
+# Optional
+#
+
+[acme.httpChallenge]
+  entryPoint = "http"
+
+[retry]
+
+# Number of attempts
+#
+# Optional
+# Default: (number servers in backend) -1
+#
+
+attempts = 3
+
+[accessLog]
+[traefikLog]
+
+
+
+
+# The address of the Traefik web interface inside the container.
+
+[web]
+address = ":4080"
+
+################################################################
+# Docker configuration backend
+################################################################
+
+# Enable Docker configuration backend
+#
+# Optional
+#
+
+[docker]
+
+# Docker server endpoint. Can be a tcp or a unix socket endpoint.
+#
+# Required
+#
+
+endpoint = "unix:///var/run/docker.sock"
+
+# Default domain used.
+# Can be overridden by setting the "traefik.domain" label on a container.
+#
+# Required
+#
+
+domain = "mealhero.me"
+
+# Enable watch docker changes
+#
+# Optional
+#
+
+watch = true
+
+# Override default configuration template. For advanced users :)
+#
+# Optional
+#
+# filename = "docker.tmpl"
+
+# Enable docker TLS connection
+#
+#  [docker.tls]
+#  ca = "/etc/ssl/ca.crt"
+#  cert = "/etc/ssl/docker.crt"
+#  key = "/etc/ssl/docker.key"
+#  insecureskipverify = true
