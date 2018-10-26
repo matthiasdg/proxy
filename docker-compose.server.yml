@@ -6,7 +6,7 @@ networks:
 
 services:
   proxy:
-    image: traefik:v1.5.4-alpine
+    image: traefik:v1.7.3-alpine
     networks:
       - traefik
     ports:
